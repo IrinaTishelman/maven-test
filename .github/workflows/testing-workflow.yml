@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - testing-nexus-speed
+  workflow_dispatch:  # Enables manual run from GitHub UI
+
 
 jobs:
   nexus-cloud:
