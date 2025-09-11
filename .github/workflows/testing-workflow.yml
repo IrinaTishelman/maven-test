@@ -1,11 +1,11 @@
- name: Repo Generic Testing Workflow
+name: Generic Testing Workflow
 
 on:
   push:
     branches:
       - testing-nexus-speed
 
-jobs:  
+jobs:
   nexus-cloud:
     runs-on: ubuntu-latest
     strategy:
@@ -13,32 +13,35 @@ jobs:
       matrix:
         iteration: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Get Maven Settings
         shell: bash
         run: |
-          echo ${{ SECRETS.NEXUS_CLOUD_SETTINGS_XML }} | base64 --decode > ./settings.xml
+          echo "${{ secrets.NEXUS_CLOUD_SETTINGS_XML }}" | base64 --decode > ./settings.xml
+
       - name: Set up JDK
         id: setup-java
         uses: actions/setup-java@v4
         with:
           java-version: 11
-          distribution: 'temurin'
+          distribution: temurin
           overwrite-settings: false
 
       - name: Record start time
         id: start
         run: echo "start_time=$(date +%s)" >> $GITHUB_ENV
 
-      - name: Maven Clean
+      - name: Maven Clean & Compile
         shell: bash
-        run: |
-          mvn clean compile --settings settings.xml
+        run: mvn clean compile --settings settings.xml
+
       - name: Write runtime to job summary
         if: always()
+        shell: bash
         run: |
           end_time=$(date +%s)
           duration=$(( end_time - start_time ))
