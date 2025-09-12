@@ -1,0 +1,51 @@
+name: Generic Testing Workflow (Direct to Central)
+
+on:
+  push:
+    branches:
+      - testing-nexus-speed
+  workflow_dispatch:  # Allow manual run
+
+jobs:
+  direct-central:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 3
+      matrix:
+        iteration: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        id: setup-java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Record start time
+        id: start
+        run: echo "start_time=$(date +%s)" >> $GITHUB_ENV
+
+      - name: Maven Clean & Compile
+        shell: bash
+        run: mvn clean compile
+
+      - name: Write runtime to job summary
+        if: always()
+        shell: bash
+        run: |
+          end_time=$(date +%s)
+          duration=$(( end_time - start_time ))
+          mins=$(( duration / 60 ))
+          secs=$(( duration % 60 ))
+          {
+            echo "### Iteration ${{ matrix.iteration }}"
+            echo ""
+            echo "⏱ Took **${mins}m ${secs}s**"
+            echo ""
+          } >> $GITHUB_STEP_SUMMARY
