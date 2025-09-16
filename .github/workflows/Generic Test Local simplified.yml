@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Generic Testing Workflow Local
+name: Generic Testing Workflow Local Simplified
 
 on:
   push:
