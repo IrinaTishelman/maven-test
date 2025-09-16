@@ -1,0 +1,59 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Generic Testing Workflow Local
+
+on:
+  push:
+    branches:
+      - testing-nexus-speed
+  workflow_dispatch:  # manual run
+
+jobs:
+  maven-build:
+    runs-on: self-hosted
+    strategy:
+      max-parallel: 3
+      matrix:
+        iteration: [1,2,3,4,5]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Write Maven settings
+        run: |
+          cat <<EOF > settings.xml
+          <settings>
+            <mirrors>
+              <mirror>
+                <id>nexus</id>
+                <mirrorOf>*</mirrorOf>
+                <url>http://localhost:8081/repository/maven-central-test/</url>
+              </mirror>
+            </mirrors>
+            <activeProfiles>
+              <activeProfile>nexus</activeProfile>
+            </activeProfiles>
+          </settings>
+          EOF
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 11
+          distribution: temurin
+
+      - name: Resolve dependencies
+        run: mvn dependency:resolve --settings settings.xml
+
+      - name: Maven Clean & Compile
+        run: mvn clean compile --settings settings.xml
+
+      - name: Record runtime
+        run: |
+          end_time=$(date +%s)
+          duration=$(( end_time - start_time ))
+          mins=$(( duration / 60 ))
+          secs=$(( duration % 60 ))
+          echo "Iteration ${matrix.iteration} took ${mins}m ${secs}s"
