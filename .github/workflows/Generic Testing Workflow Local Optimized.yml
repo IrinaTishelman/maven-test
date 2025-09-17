@@ -1,0 +1,51 @@
+name: Generic Testing Workflow Local Optimized
+
+on:
+  push:
+    branches:
+      - testing-nexus-speed
+  workflow_dispatch:
+
+jobs:
+  nexus-local:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Maven settings
+        run: |
+          mkdir -p ~/.m2
+          echo "${{ secrets.NEXUS_LOCAL_SETTINGS_XML }}" | base64 --decode > ~/.m2/settings.xml
+
+      - name: Set up JDK with cache
+        uses: actions/setup-java@v4
+        with:
+          java-version: 11
+          distribution: temurin
+          cache: maven
+          overwrite-settings: false
+
+      - name: Run 20 performance iterations
+        run: |
+          for i in {1..20}; do
+            echo "### Iteration $i" >> $GITHUB_STEP_SUMMARY
+            start=$(date +%s)
+
+            # Dependency resolve only (faster than compile, but still hits Nexus)
+            mvn -T 1C dependency:resolve -U
+
+            end=$(date +%s)
+            duration=$(( end - start ))
+            mins=$(( duration / 60 ))
+            secs=$(( duration % 60 ))
+
+            {
+              echo ""
+              echo "⏱ Took **${mins}m ${secs}s**"
+              echo ""
+            } >> $GITHUB_STEP_SUMMARY
+          done
