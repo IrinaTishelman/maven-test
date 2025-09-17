@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - testing-nexus-speed
-  workflow_dispatch:
+  workflow_dispatch:  # Enables manual run
 
 jobs:
-  nexus-cloud:
-    runs-on: ubuntu-latest
+  nexus-local:
+    runs-on: self-hosted   # self-hosted runner with access to Nexus
     strategy:
       max-parallel: 3
       matrix:
@@ -20,40 +20,43 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Cache Maven wrapper
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.m2/wrapper
-            .mvn/wrapper
-          key: ${{ runner.os }}-maven-wrapper
-
       - name: Get Maven Settings
-        run: echo "${{ secrets.NEXUS_LOCAL_SETTINGS_XML }}" | base64 --decode > ./settings.xml
+        shell: bash
+        run: |
+          echo "${{ secrets.NEXUS_LOCAL_SETTINGS_XML }}" | base64 --decode > ./settings.xml
 
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: 11
           distribution: temurin
+          cache: maven  # Cache Maven dependencies automatically
           overwrite-settings: false
+
+      - name: Restore Maven local repository cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: nexus-m2-${{ runner.os }}-iteration-${{ matrix.iteration }}
+          restore-keys: |
+            nexus-m2-${{ runner.os }}-
 
       - name: Record start time
         run: echo "start_time=$(date +%s)" >> $GITHUB_ENV
 
-      - name: Maven Build
-        run: mvn -B compile --settings settings.xml
+      - name: Maven Clean & Package
+        shell: bash
+        run: mvn clean package --settings settings.xml -B -T 1C
+
+      - name: Save Maven cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: nexus-m2-${{ runner.os }}-iteration-${{ matrix.iteration }}
 
       - name: Write runtime to job summary
         if: always()
+        shell: bash
         run: |
           end_time=$(date +%s)
           duration=$(( end_time - start_time ))
