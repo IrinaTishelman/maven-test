@@ -1,4 +1,4 @@
-name: Generic Testing Workflow
+name: Generic Testing Workflow Optimized
 
 on:
   push:
