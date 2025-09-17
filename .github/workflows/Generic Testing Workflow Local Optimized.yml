@@ -46,7 +46,7 @@ jobs:
 
       - name: Maven Clean & Package
         shell: bash
-        run: mvn clean package --settings settings.xml -B -T 1C
+        run: mvn clean package -DskipBootRepackage --settings settings.xml
 
       - name: Save Maven cache
         uses: actions/cache@v3
