@@ -32,7 +32,10 @@ jobs:
           java-version: 11
           distribution: temurin
           overwrite-settings: false
-
+      - name: Test Nexus Connectivity
+        run: |
+          echo "Testing Nexus availability on localhost:8081..."
+          curl -v http://localhost:8081/repository/maven-proxy-test2/ || true
       - name: Record start time
         id: start
         run: echo "start_time=$(date +%s)" >> $GITHUB_ENV
