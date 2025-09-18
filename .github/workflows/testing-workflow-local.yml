@@ -40,11 +40,13 @@ jobs:
       - name: Show settings.xml
         run: |
           echo "===== settings.xml ====="
-          cat ./settings.xml
+          cat $HOME/.m2/settings.xml
+
           echo "========================"
 
       - name: Show Effective Settings
-        run: mvn help:effective-settings --settings ./settings.xml
+        run: mvn help:effective-settings --settings $HOME/.m2/settings.xml
+
 
 
       - name: Record start time
