@@ -36,6 +36,17 @@ jobs:
         run: |
           echo "Testing Nexus availability on localhost:8081..."
           curl -v http://localhost:8081/repository/maven-proxy-test2/ || true
+          
+      - name: Show settings.xml
+        run: |
+          echo "===== settings.xml ====="
+          cat ./settings.xml
+          echo "========================"
+
+      - name: Show Effective Settings
+        run: mvn help:effective-settings --settings ./settings.xml
+
+
       - name: Record start time
         id: start
         run: echo "start_time=$(date +%s)" >> $GITHUB_ENV
