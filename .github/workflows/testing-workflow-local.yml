@@ -23,7 +23,7 @@ jobs:
       - name: Get Maven Settings
         shell: bash
         run: |
-          echo "${{ secrets.NEXUS_LOCAL_SETTINGS_XML }}" | base64 --decode > $HOME/.m2/settings.xml
+          echo "${{ secrets.NEXUS_LOCAL_SETTINGS_XML }}" | base64 --decode > $HOME/.m2/settings.xml -X
 
       - name: Set up JDK
         id: setup-java
