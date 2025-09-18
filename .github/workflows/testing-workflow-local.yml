@@ -48,14 +48,13 @@ jobs:
         run: mvn help:effective-settings --settings $HOME/.m2/settings.xml
 
 
-
       - name: Record start time
         id: start
         run: echo "start_time=$(date +%s)" >> $GITHUB_ENV
 
       - name: Maven Clean & Compile
         shell: bash
-        run: mvn clean compile --settings $HOME/.m2/settings.xml -X
+        run: mvn clean compile -U -X --settings $HOME/.m2/settings.xml
 
       - name: Write runtime to job summary
         if: always()
