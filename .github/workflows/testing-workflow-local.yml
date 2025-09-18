@@ -23,7 +23,9 @@ jobs:
       - name: Get Maven Settings
         shell: bash
         run: |
-          echo "${{ secrets.NEXUS_LOCAL_SETTINGS_XML }}" | base64 --decode > $HOME/.m2/settings.xml
+         mkdir -p $HOME/.m2
+         echo "${{ secrets.NEXUS_LOCAL_SETTINGS_XML }}" | base64 --decode > $HOME/.m2/settings.xml
+
 
       - name: Set up JDK
         id: setup-java
@@ -46,7 +48,8 @@ jobs:
 
       - name: Show Effective Settings
         run: mvn help:effective-settings --settings $HOME/.m2/settings.xml
-
+      - name: Verify settings.xml exists
+        run: ls -l $HOME/.m2/settings.xml
 
       - name: Record start time
         id: start
