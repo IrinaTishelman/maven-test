@@ -9,7 +9,7 @@ on:
 
 jobs:
   nexus-cloud:
-    runs-on: self-hosted  # <-- self-hosted runner labels # <-- changed to self-hosted runner
+    runs-on: self-hosted
     strategy:
       max-parallel: 3
       matrix:
@@ -39,7 +39,7 @@ jobs:
 
       - name: Maven Clean & Compile
         shell: bash
-        run: mvn clean package --settings settings.xml
+        run: mvn clean compile --settings settings.xml
 
       - name: Write runtime to job summary
         if: always()
